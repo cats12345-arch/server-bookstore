@@ -1,8 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
+const Joi = require("joi");
 const app = express();
 app.use(express.static("public"));
+app.use("/uploads", express.static("public"));
 app.use(express.json());
 app.use(cors());
 
@@ -15,6 +17,10 @@ const storage = multer.diskStorage({
       cb(null, file.originalname);
     },
 });
+
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
+})
   
 const upload = multer({ storage: storage });
 
@@ -144,3 +150,79 @@ app.get("/api/books:id", (req, res)=>{
 app.listen(3001, () => {
     console.log("server works");
 })
+
+app.delete("api/books/id" , (req, res) => {
+  const book = books.find((h) => h.id === parseInt(req.params.id));
+
+  if (!book) {
+    res.status(404).send("The book with the given id was not found");
+  }
+
+  const index = books.indexOf(book);
+  books.splice(index, 1);
+  res.send(book);
+})
+
+app.post("/api/books", upload.single("img"), (req, res) => {
+  const result = validateBook(req.body);
+
+  if (result.error) {
+    res.status(400).send(result.error.details[0].message);
+    return;
+  }
+
+  const book = {
+    id: books.lnegth + 1,
+    name: req.body.name,
+    author: req.body.author,
+    price: req.body.price,
+    releaseDate: req.body.releaseDate,
+    imagePath: req.body.imagePath,
+    description: req.body.description,
+    popularBook: req.body.popularBook,
+    newBook: req.body.newBook,
+  }
+
+  books.push(book);
+  res.status(200).send(book);
+});
+
+app.put("/api/books/:id", upload.single("img"), (req, res) => {
+  let book = books.find((h) => h.id === parseInt(req.params.id));
+
+  if (!book) res.status(400).send("book with given id was not found");
+
+  const result = validateBook(req.body);
+
+  if (result.error) {
+    res.status(400).send(result.error.details[0].message);
+    return;
+  }
+
+  book.name = req.body.name;
+  book.author = req.body.author;
+  book.price = req.body.price;
+  book.releaseDate = req.body.releaseDate;
+  book.imagePath = req.body.imagePath;
+  book.description = req.body.description;
+  book.popularBook = req.body.popularBook;
+  book.newBook = req.body.newBook;
+
+  res.send(book);
+});
+
+const validateBook = (Book) => {
+  const schema = Joi.object({
+    id: Joi.allow(""),
+    name: Joi.string().min(1).required(),
+    author: Joi.string().min(1).required(),
+    price: Joi.number().required(),
+    releaseDate: Joi.string().min(1).required(),
+    imagePath: Joi.string().min(1).required(),
+    description: Joi.string().min(1).required(),
+    popularBook: Joi.boolean().required(),
+    newBook: Joi.boolean().required(),
+  })
+
+  return schema.validate(Book);
+};
