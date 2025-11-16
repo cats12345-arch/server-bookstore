@@ -172,7 +172,7 @@ app.post("/api/books", upload.single("img"), (req, res) => {
   }
 
   const book = {
-    id: books.lnegth + 1,
+    id: books.length,
     name: req.body.name,
     author: req.body.author,
     price: req.body.price,
@@ -181,6 +181,10 @@ app.post("/api/books", upload.single("img"), (req, res) => {
     description: req.body.description,
     popularBook: req.body.popularBook,
     newBook: req.body.newBook,
+  }
+
+  if (req.file) {
+    book.imagePath = req.file.filename;
   }
 
   books.push(book);
@@ -208,6 +212,10 @@ app.put("/api/books/:id", upload.single("img"), (req, res) => {
   book.popularBook = req.body.popularBook;
   book.newBook = req.body.newBook;
 
+  if (req.file) {
+    book.imagePath = req.file.filename;
+  }
+
   res.send(book);
 });
 
@@ -218,7 +226,6 @@ const validateBook = (Book) => {
     author: Joi.string().min(1).required(),
     price: Joi.number().required(),
     releaseDate: Joi.string().min(1).required(),
-    imagePath: Joi.string().min(1).required(),
     description: Joi.string().min(1).required(),
     popularBook: Joi.boolean().required(),
     newBook: Joi.boolean().required(),
