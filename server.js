@@ -171,6 +171,21 @@ app.post("/api/books", upload.single("img"), (req, res) => {
     return;
   }
 
+  popularBook = false;
+  newBook = false;
+
+  if(req.body.popularBook === "true") {
+    popularBook = true;
+  } else {
+    popularBook = false;
+  }
+
+  if(req.body.newBook === "true") {
+    newBook = true;
+  } else {
+    newBook = false;
+  }
+
   const book = {
     id: books.length,
     name: req.body.name,
@@ -179,8 +194,8 @@ app.post("/api/books", upload.single("img"), (req, res) => {
     releaseDate: req.body.releaseDate,
     imagePath: req.body.imagePath,
     description: req.body.description,
-    popularBook: req.body.popularBook,
-    newBook: req.body.newBook,
+    popularBook: popularBook,
+    newBook: newBook,
   }
 
   if (req.file) {
