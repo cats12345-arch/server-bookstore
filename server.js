@@ -48,7 +48,7 @@ let books = [
     "newBook": false
   },
 	{
-    "id:": 2,
+    "id": 2,
     "name": "Charlotte's Web",
     "author": "E.B White",
     "price": 8.99,
@@ -151,8 +151,9 @@ app.listen(3001, () => {
     console.log("server works");
 })
 
-app.delete("api/books/id" , (req, res) => {
+app.delete("/api/books/:id" , (req, res) => {
   const book = books.find((h) => h.id === parseInt(req.params.id));
+  console.log(req.params.id);
 
   if (!book) {
     res.status(404).send("The book with the given id was not found");
